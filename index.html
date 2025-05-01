@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sweet Puff Kiosk</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="icon" type="image/svg+xnl" href="images/icon.svg">
+</head>
+
+<body class="bg-orange-50">
+
+  <!-- welcome page -->
+  <div id="welcomePage" class="h-screen bg-[url(images/bg1.png)] bg-cover bg-no-repeat bg-center flex items-center justify-center">
+    <div class="max-w-3xl mx-auto px-4 text-center">
+      <img src="images/cookie.png" alt="Cookie" class="mx-auto w-48 sm:w-64">
+      <p class="text-white mt-8 text-xl sm:text-2xl">Fresh bakes and puffy delights await you at</p>
+      <p class="text-white mt-4 text-4xl sm:text-5xl md:text-6xl font-medium font-serif italic">— Sweet Puff —</p>
+      <p class="text-white mt-4 mb-16 italic text-xl sm:text-2xl">where sweetness lingers.</p>
+      <button id="startOrder" class="bg-white text-yellow-900 py-3 px-6 rounded-lg text-xl hover:scale-105 transition duration-300 hover:bg-orange-50">
+        Touch to Start
+      </button>
+    </div>
+  </div>
+
+  <!-- order type page -->
+  <div id="orderTypePage" class="hidden h-screen bg-[url(images/bg2.png)] bg-cover bg-no-repeat bg-center flex items-center justify-center">
+    <div class="flex flex-col items-center text-center">
+      <h1 class="text-4xl sm:text-5xl font-serif text-white mb-8 italic drop-shadow-lg">How would you like to order?</h1>
+      <div class="flex gap-10 items-center justify-center">
+        <button class="orderBtn bg-white p-6 rounded-xl shadow-lg flex flex-col hover:scale-105 transition" data-type="dinein">
+          <img src="images/in.png" alt="Dine In" class="w-24 mb-2">
+          <span class="text-yellow-900 font-semibold">Dine In</span>
+        </button>
+        <button class="orderBtn bg-white p-6 rounded-xl shadow-lg flex flex-col hover:scale-105 transition" data-type="takeout">
+          <img src="images/out.png" alt="Take Out" class="w-24 mb-2">
+          <span class="text-yellow-900 font-semibold">Take Out</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- menu page -->
+  <div id="menuPage" class="hidden max-w-7xl mx-auto p-6">
+    <div class="bg-white rounded-2xl shadow-2xl p-6">
+      <div class="flex justify-between items-center mb-4">
+        <p class="text-3xl font-serif font-semibold text-yellow-900">Menu</p>
+        <button id="viewCart" class="bg-yellow-900 hover:bg-yellow-800 text-white py-2 px-4 rounded-lg">Go to Cart</button>
+      </div>
+      <div class="filter-buttons flex flex-wrap gap-2 text-sm mb-6">
+        <button onclick="filterMenu('all', this)" class="filter-btn bg-rose-50 shadow-inner px-4 py-2 rounded">All</button>
+        <button onclick="filterMenu('cookies', this)" class="filter-btn shadow-inner px-4 py-2 rounded">Cookies</button>
+        <button onclick="filterMenu('puffs', this)" class="filter-btn shadow-inner px-4 py-2 rounded">Puffs</button>
+        <button onclick="filterMenu('drinks', this)" class="filter-btn shadow-inner px-4 py-2 rounded">Drinks</button>
+      </div>
+      <div id="product-list" class="grid grid-cols-1 sm:grid-cols-3 gap-6"></div>
+    </div>
+  </div>
+
+  <!-- cart page -->
+  <div id="cartPage" class="hidden max-w-2xl mx-auto p-6 relative">
+      <button id="backToMenuBtn" class="mb-4 bg-yellow-900 hover:bg-yellow-800 text-white font-semibold py-2 px-4 rounded-lg flex-1">Back to Menu</button>
+    <div class="bg-white rounded-2xl shadow-2xl p-6">
+      <p class="text-2xl font-serif font-semibold mb-4 text-yellow-900">Your Cart</p>
+      <div id="order-summary" class="space-y-2 mb-4 max-h-72 overflow-y-auto"></div>
+      <p class="text-lg font-semibold">Total: ₱<span id="total">0</span></p>
+      <div class="mt-6 flex flex-col sm:flex-row gap-4">
+        <button id="checkoutBtn" class="bg-yellow-900 hover:bg-yellow-800 text-white font-semibold py-2 px-4 rounded-lg flex-1">Checkout</button>
+        <button id="cancelOrderBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg flex-1">Cancel Order</button>
+      </div>
+    </div>
+
+    <!-- cancel confirmation -->
+    <div id="cancelOverlay" class="hidden fixed inset-0 bg-yellow-950 bg-opacity-80 z-10"></div>
+    <div id="cancelConfirm" class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border shadow-lg rounded-xl p-4 z-20 w-80">
+      <p class="mb-4 text-center text-lg">Are you sure you want to cancel your order?</p>
+      <div class="flex gap-4 justify-center">
+        <button id="confirmCancel" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded">Yes</button>
+        <button id="denyCancel" class="bg-yellow-900 hover:bg-yellow-800 text-white py-2 px-4 rounded">No</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- payment page -->
+  <div id="paymentPage" class="hidden h-screen bg-[url(images/bg2.png)] bg-cover bg-no-repeat bg-center flex flex-col justify-center items-center">
+    <h1 class="text-4xl sm:text-5xl font-serif text-white mb-8 text-center italic drop-shadow-lg">Choose Your Payment Method</h1>
+    <div class="flex gap-10 items-center justify-center">
+      <button class="paymentMethod bg-white p-4 rounded-xl shadow-lg flex flex-col hover:scale-105 transition" data-method="card">
+        <img src="images/card.png" alt="Card" class="w-28 mb-2">
+        <span class="text-yellow-900 font-semibold">Card</span>
+      </button>
+      <button class="paymentMethod bg-white p-4 rounded-xl shadow-lg flex flex-col hover:scale-105 transition" data-method="cash">
+        <img src="images/cash.png" alt="Cash" class="w-28 mb-2">
+        <span class="text-yellow-900 font-semibold text-center">Cash</span>
+      </button>
+      <button class="paymentMethod bg-white p-4 rounded-xl shadow-lg flex flex-col hover:scale-105 transition" data-method="emobile">
+        <img src="images/emobile.png" alt="E-mobile" class="w-28 mb-2">
+        <span class="text-yellow-900 font-semibold">E-mobile</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- receipt page -->
+  <div id="receiptPage" class="hidden h-screen flex justify-center items-center p-4">
+    <div class="bg-white shadow-lg rounded-lg max-w-md w-full p-6 flex flex-col justify-center items-center text-center" id="receiptContent"></div>
+  </div>
+
+<script>
+$(document).ready(function() {
+  let order = [];
+
+  function showPage(pageId) {
+    $('body > div').addClass('hidden');
+    $('#' + pageId).removeClass('hidden');
+  }
+
+  $('#startOrder').click(() => showPage('orderTypePage'));
+  $('.orderBtn').click(() => showPage('menuPage'));
+  $('#viewCart').click(() => showPage('cartPage'));
+  $('#backToMenuBtn').click(() => showPage('menuPage'));
+
+  $('#cancelOrderBtn').click(() => {$('#cancelOverlay').fadeIn(); $('#cancelConfirm').fadeIn(); });
+  $('#denyCancel').click(() => {$('#cancelOverlay').fadeOut(); $('#cancelConfirm').fadeOut(); });
+  $('#confirmCancel').click(() => {
+    order = [];
+    updateCart();
+    $('#cancelOverlay').fadeOut();
+    $('#cancelConfirm').fadeOut();
+    showPage('welcomePage');
+  });
+
+  $('#checkoutBtn').click(() => showPage('paymentPage'));
+
+  $('.paymentMethod').click(function() {
+    const method = $(this).data('method');
+    let message = '';
+
+    if (method === 'cash') {
+      generateReceipt();
+    } else {
+      message = `<p class='mb-4'>Payment in progress via ${method}...</p>`;
+      $('#receiptContent').html(message);
+      setTimeout(generateReceipt, 2000);
+      showPage('receiptPage');
+    }
+  });
+
+  function generateReceipt() {
+    const timestamp = new Date().toLocaleString();
+    const transactionId = 'SWP' + Math.floor(Math.random() * 10000);
+    let total = 0;
+    let html = `
+      <div class='text-center mb-6'>
+        <img src='images/logo_name.svg' alt='Sweet Puff' class='mx-auto w-38'/>
+        <p class='text-2xl font-bold font-serif text-yellow-900'>Receipt</p>
+        <p class='text-sm text-gray-600'>${timestamp}</p>
+        <p class='text-sm text-gray-600'>Transaction #${transactionId}</p>
+      </div>
+      <table class='w-full text-sm border-t border-b border-gray-300 mb-4'>
+        <thead>
+          <tr class='text-left'>
+            <th class='py-1 text-center'>Item</th>
+            <th class='py-1 text-center'>Quantity</th>
+            <th class='py-1 text-center'>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    order.forEach(item => {
+      const subtotal = item.product.price * item.quantity;
+      total += subtotal;
+      html += `
+        <tr class='border-t border-gray-200'>
+          <td class='py-1 text-center'>${item.product.name}</td>
+          <td class='py-1 text-center'>${item.quantity}</td>
+          <td class='py-1 text-center'>₱${subtotal}</td>
+        </tr>
+      `;
+    });
+
+    html += `</tbody></table>
+      <p class='text-right text-sm'><strong>Total: ₱${total}</strong></p>
+      <button onclick="location.reload()" class="mt-6 bg-yellow-900 hover:bg-yellow-800 text-white py-2 px-4 rounded">OK</button>
+    `;
+
+    $('#receiptContent').html(html);
+    showPage('receiptPage');
+  }
+
+  const products = [
+      { name: "White Dream", price: 75, category:"cookies", image: "images/cm1.png" },
+      { name: "Red Velvet", price: 75, category:"cookies", image: "images/cm2.png" },
+      { name: "Choco Classic", price: 70, category:"cookies", image: "images/cm3.png" },
+      { name: "Raspberry Turnover", price: 85, category:"puffs", image: "images/pm1.png" },
+      { name: "Hazelnut Swirl", price: 80, category:"puffs", image: "images/pm2.png" },
+      { name: "Cream Puff", price: 65, category:"puffs", image: "images/pm3.png" },
+      { name: "Strawberry Danish", price: 85, category:"puffs", image: "images/pm4.png" },
+      { name: "Chocolate Croissant", price: 80, category:"puffs", image: "images/pm5.png" },
+      { name: "Butter Croissant", price: 70, category:"puffs", image: "images/pm6.png" },
+      { name: "Café Latte", price: 120, category:"drinks", image: "images/d1.png" },
+      { name: "Caramel Cappuccino", price: 130, category:"drinks", image: "images/d2.png" },
+      { name: "Hot Chocolate", price: 110, category:"drinks", image: "images/d3.png" },
+      { name: "Iced Vanilla Latte", price: 125, category:"drinks", image: "images/d4.png" },
+      { name: "Strawberry Fizz", price: 135, category:"drinks", image: "images/d5.png" },
+      { name: "Iced Matcha Latte", price: 135, category:"drinks", image: "images/d6.png" },
+  ];
+
+  window.filterMenu = function(category, btn) {
+    $('.filter-btn').removeClass('bg-rose-50');
+    $(btn).addClass('bg-rose-50');
+    const filtered = category === 'all' ? products : products.filter(p => p.category === category);
+    displayProducts(filtered);
+  };
+
+  function displayProducts(items) {
+    const container = $('#product-list').empty();
+    items.forEach((p, idx) => {
+      const card = $(`
+        <div class="bg-white border rounded-xl shadow p-4 text-center flex flex-col items-center">
+          <img src="${p.image}" class="w-24 h-24 object-cover rounded mb-3"/>
+          <p class="text-lg font-serif italic font-semibold text-yellow-900">${p.name}</p>
+          <p class="text-md text-gray-600 mb-2">₱${p.price}</p>
+          <input type="number" min="1" value="1" id="qty-${idx}" class="w-20 border rounded px-2 py-1 text-center mb-2">
+          <button class="bg-yellow-900 hover:bg-yellow-800 text-white px-4 py-2 rounded text-sm">Add to Cart</button>
+        </div>
+      `);
+      card.find('button').click(() => {
+        const qty = parseInt($(`#qty-${idx}`).val());
+        if (qty > 0) {
+          const existing = order.find(o => o.product.name === p.name);
+          if (existing) {
+            existing.quantity += qty;
+          } else {
+            order.push({ product: p, quantity: qty });
+          }
+          updateCart();
+        }
+      });
+      container.append(card);
+    });
+  }
+
+  function updateCart() {
+    const list = $('#order-summary').empty();
+    let total = 0;
+    order.forEach(item => {
+      const subtotal = item.product.price * item.quantity;
+      total += subtotal;
+      list.append(`
+        <div class="border p-4 rounded-lg flex flex-col justify-between">
+          <div class="text-lg font-semibold text-yellow-900">${item.product.name}</div>
+          <div class="flex justify-between items-end mt-2">
+            <div class="flex items-center gap-2">
+              <button class="decreaseQty bg-gray-300 hover:bg-gray-400 text-gray-800 px-2 rounded" data-name="${item.product.name}">-</button>
+              <span class="text-sm text-gray-600">${item.quantity}</span>
+              <button class="increaseQty bg-gray-300 hover:bg-gray-400 text-gray-800 px-2 rounded" data-name="${item.product.name}">+</button>
+            </div>
+            <div class="text-sm text-gray-600">₱${subtotal}</div>
+          </div>
+        </div>
+      `);
+    });
+    $('#total').text(total);
+  
+    $('.increaseQty').click(function() {
+      const name = $(this).data('name');
+      const item = order.find(o => o.product.name === name);
+      if (item) {
+        item.quantity += 1;
+        updateCart();
+      }
+    });
+
+    $('.decreaseQty').click(function() {
+      const name = $(this).data('name');
+      const itemIndex = order.findIndex(o => o.product.name === name);
+      if (itemIndex !== -1) {
+        order[itemIndex].quantity -= 1;
+        if (order[itemIndex].quantity <= 0) {
+          order.splice(itemIndex, 1);
+        }
+        updateCart();
+      }
+    });
+  }
+
+  displayProducts(products);
+});
+</script>
+
+</body>
+</html>
